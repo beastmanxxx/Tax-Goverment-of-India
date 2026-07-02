@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Border Tax Payment</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  html { font-size: 16px; }
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #e9edf2;
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+  }
+  .hero-banner {
+    width: 100%;
+    display: block;
+  }
+  .hero-banner img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .page-wrap {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #ccc;
+    min-height: 100vh;
+    box-shadow: 0 0 20px rgba(0,0,0,0.06);
+    position: relative;
+  }
+  .top-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: clamp(8px,1.5vw,16px) clamp(12px,3vw,32px);
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+  }
+  .top-banner .logo-block {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: clamp(10px,1vw,13px);
+  }
+  .top-banner img { height: clamp(34px,4vw,56px); }
+  .ministry-title {
+    text-align: center;
+    flex: 1;
+    font-size: clamp(13px,1.8vw,22px);
+    font-weight: bold;
+    color: #222;
+    line-height: 1.3;
+  }
+  .ministry-title .sub {
+    font-weight: normal;
+    font-size: clamp(11px,1.3vw,16px);
+  }
+  .nav-bar {
+    background: #f2f2f2;
+    border-bottom: 1px solid #ddd;
+    padding: clamp(6px,1vw,10px) clamp(12px,3vw,32px);
+    display: flex;
+    gap: clamp(14px,2vw,28px);
+    font-size: clamp(11px,1.1vw,15px);
+    flex-wrap: wrap;
+  }
+  .nav-bar a {
+    color: #1a4fa0;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  .nav-bar a:hover { text-decoration: underline; }
+  .notice-bar {
+    background: #fff3cd;
+    color: #7a5b00;
+    font-size: clamp(10px,1vw,14px);
+    padding: clamp(5px,1vw,10px) clamp(12px,3vw,32px);
+    border-bottom: 1px solid #f0dca0;
+  }
+  .notice-bar b { color: #b30000; }
+  .title-bar {
+    background: #2f6fb0;
+    color: #fff;
+    text-align: center;
+    font-weight: bold;
+    font-size: clamp(14px,1.6vw,20px);
+    padding: clamp(8px,1.2vw,14px);
+    letter-spacing: 0.5px;
+  }
+  .payment-bar {
+    background: #12305c;
+    color: #fff;
+    text-align: center;
+    font-weight: bold;
+    font-size: clamp(14px,1.6vw,20px);
+    padding: clamp(8px,1.2vw,14px);
+  }
+  .form-section {
+    padding: clamp(10px,2vw,24px) clamp(12px,3vw,32px);
+  }
+  .form-box {
+    border: 1px solid #cfd8e3;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .form-box-header {
+    background: #e7edf5;
+    padding: clamp(8px,1.2vw,14px) clamp(10px,2vw,20px);
+    font-weight: bold;
+    font-size: clamp(13px,1.3vw,17px);
+    color: #1a3a63;
+    border-bottom: 1px solid #cfd8e3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .form-box-body {
+    padding: clamp(12px,2.2vw,26px);
+    display: flex;
+    gap: clamp(10px,2vw,24px);
+    align-items: flex-end;
+    flex-wrap: wrap;
+    background: #fbfcfe;
+  }
+  .field-group {
+    flex: 1;
+    min-width: 220px;
+  }
+  .field-group label {
+    display: block;
+    font-size: clamp(12px,1.1vw,15px);
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: #333;
+  }
+  .field-group label .req { color: #c0392b; }
+  .field-group select, .field-group input {
+    width: 100%;
+    padding: clamp(6px,1vw,10px) 8px;
+    font-size: clamp(12px,1.1vw,15px);
+    border: 1px solid #b7c3d0;
+    border-radius: 3px;
+    background: #fff;
+    color: #555;
+  }
+  .fake-select {
+    width: 100%;
+    padding: clamp(6px,1vw,10px) 8px;
+    font-size: clamp(12px,1.1vw,15px);
+    border: 1px solid #b7c3d0;
+    border-radius: 3px;
+    background-color: #fff;
+    color: #555;
+    cursor: pointer;
+    user-select: none;
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .fake-select.placeholder { color: #8a94a3; }
+  .fake-select::after {
+    content: "▾";
+    color: #667;
+    margin-left: 8px;
+  }
+  .go-btn, .action-btn {
+    background: linear-gradient(#3f7fc1, #2f6fb0);
+    color: #fff;
+    border: 1px solid #2a5a92;
+    padding: clamp(7px,1vw,11px) clamp(20px,2.5vw,36px);
+    font-size: clamp(12px,1.1vw,15px);
+    font-weight: bold;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .go-btn:hover, .action-btn:hover { background: #2f6fb0; }
+  .action-btn.secondary {
+    background: #fff;
+    color: #2f6fb0;
+  }
+  .action-btn.reset {
+    background: linear-gradient(#eee, #ddd);
+    color: #333;
+    border: 1px solid #bbb;
+  }
+  .instructions {
+    padding: clamp(10px,2vw,24px) clamp(16px,3.5vw,40px) clamp(24px,3vw,40px);
+  }
+  .instructions h3 {
+    font-size: clamp(13px,1.3vw,17px);
+    color: #12305c;
+    margin: 6px 0 12px;
+  }
+  .instructions ol {
+    margin: 0;
+    padding-left: 20px;
+    font-size: clamp(12px,1.1vw,15px);
+    line-height: 1.9;
+    color: #333;
+  }
+  .instructions ol ol {
+    list-style-type: lower-alpha;
+    margin-top: 4px;
+  }
+  .instructions b { color: #12305c; }
+
+  .overlay-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  .overlay-panel {
+    background: #fff;
+    width: 100%;
+    max-width: 420px;
+    max-height: 82vh;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  }
+  .overlay-header {
+    padding: 14px 18px;
+    font-weight: bold;
+    font-size: 15px;
+    color: #12305c;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f7f9fc;
+  }
+  .overlay-header button {
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    cursor: pointer;
+    color: #666;
+    line-height: 1;
+  }
+  .overlay-list {
+    overflow-y: auto;
+  }
+  .overlay-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 18px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    font-size: 15px;
+    color: #222;
+  }
+  .overlay-item:hover { background: #f5f8fc; }
+  .radio {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #9aa5b1;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .radio.checked { border-color: #2f6fb0; }
+  .radio.checked::after {
+    content: "";
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #2f6fb0;
+  }
+
+  .tax-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+    font-size: clamp(11px,1vw,14px);
+  }
+  .tax-table th {
+    background: #e7edf5;
+    color: #1a3a63;
+    padding: 8px;
+    border: 1px solid #cfd8e3;
+    text-align: left;
+  }
+  .tax-table td {
+    padding: 10px 8px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    color: #666;
+  }
+  .total-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .total-row label {
+    font-weight: bold;
+    font-size: clamp(12px,1.1vw,15px);
+    white-space: nowrap;
+  }
+  .total-row input {
+    max-width: 200px;
+    padding: clamp(6px,1vw,10px) 8px;
+    border: 1px solid #b7c3d0;
+    border-radius: 3px;
+  }
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  /* Login Page */
+  .login-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #e9edf2;
+    padding: 0;
+  }
+  .login-hero-banner {
+    width: 100%;
+    max-width: 1100px;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+  .login-box {
+    background: #fff;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    overflow: hidden;
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+  .login-header {
+    background: #12305c;
+    color: #fff;
+    text-align: center;
+    padding: clamp(18px,3vw,28px) 20px;
+  }
+  .login-header h2 {
+    margin: 0 0 4px;
+    font-size: clamp(18px,2.2vw,24px);
+  }
+  .login-header p {
+    margin: 0;
+    font-size: clamp(12px,1.1vw,14px);
+    opacity: 0.8;
+  }
+  .login-body {
+    padding: clamp(20px,3vw,32px);
+  }
+  .login-field {
+    margin-bottom: 18px;
+  }
+  .login-field label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 6px;
+  }
+  .login-field input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: 1px solid #b7c3d0;
+    border-radius: 4px;
+    background: #f9fafb;
+    color: #333;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .login-field input:focus {
+    outline: none;
+    border-color: #2f6fb0;
+    box-shadow: 0 0 0 3px rgba(47,111,176,0.15);
+    background: #fff;
+  }
+  .login-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(#3f7fc1, #2f6fb0);
+    border: 1px solid #2a5a92;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 6px;
+  }
+  .login-btn:hover { background: #2f6fb0; }
+  .login-error {
+    background: #fde8e8;
+    color: #b91c1c;
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+    border: 1px solid #f5c6c6;
+    display: none;
+  }
+  .login-error.show { display: block; }
+  .login-footer {
+    text-align: center;
+    padding: 14px 20px;
+    border-top: 1px solid #eee;
+    font-size: 12px;
+    color: #888;
+  }
+
+  /* Calendar Picker */
+  .cal-panel {
+    background: #fff;
+    width: 100%;
+    max-width: 340px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  }
+  .cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: #12305c;
+    color: #fff;
+  }
+  .cal-header .cal-title {
+    font-weight: bold;
+    font-size: 15px;
+  }
+  .cal-header button {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    line-height: 1;
+  }
+  .cal-header button:hover { background: rgba(255,255,255,0.15); }
+  .cal-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid #eee;
+  }
+  .cal-nav button {
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #2f6fb0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+  .cal-nav button:hover { background: #eef3f9; }
+  .cal-nav .cal-month-year {
+    font-weight: bold;
+    font-size: 15px;
+    color: #222;
+  }
+  .cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 8px 12px 4px;
+    background: #f7f9fc;
+  }
+  .cal-weekday {
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #666;
+    padding: 4px 0;
+  }
+  .cal-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 4px 12px 14px;
+    gap: 2px;
+  }
+  .cal-day {
+    text-align: center;
+    padding: 7px 0;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 6px;
+    color: #333;
+    transition: background 0.15s;
+  }
+  .cal-day:hover { background: #e8edf5; }
+  .cal-day.other { color: #bbb; }
+  .cal-day.selected {
+    background: #2f6fb0;
+    color: #fff;
+    font-weight: bold;
+  }
+  .cal-day.today {
+    border: 1px solid #2f6fb0;
+  }
+  .cal-day.selected.today { border: none; }
+  .cal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 16px;
+    border-top: 1px solid #eee;
+    gap: 8px;
+  }
+  .cal-footer button {
+    padding: 6px 16px;
+    font-size: 13px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #b7c3d0;
+    background: #fff;
+    color: #333;
+  }
+  .cal-footer button:hover { background: #f5f5f5; }
+  .cal-footer button.primary {
+    background: #2f6fb0;
+    color: #fff;
+    border-color: #2a5a92;
+  }
+  .cal-footer button.primary:hover { background: #1e5a94; }
+
+  .cal-time-section {
+    padding: 12px 16px;
+    border-top: 1px solid #eee;
+    background: #f7f9fc;
+  }
+  .cal-time-label {
+    font-weight: bold;
+    font-size: 13px;
+    color: #12305c;
+    margin-bottom: 8px;
+  }
+  .cal-time-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cal-time-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .cal-time-col-label {
+    font-size: 11px;
+    color: #666;
+    font-weight: bold;
+  }
+  .cal-time-scroll-list {
+    height: 120px;
+    overflow-y: auto;
+    border: 1px solid #b7c3d0;
+    border-radius: 4px;
+    background: #fff;
+  }
+  .cal-time-scroll-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  .cal-time-scroll-list::-webkit-scrollbar-thumb {
+    background: #aab;
+    border-radius: 3px;
+  }
+  .cal-time-scroll-item {
+    padding: 7px 10px;
+    font-size: 14px;
+    text-align: center;
+    cursor: pointer;
+    color: #333;
+    transition: background 0.15s;
+  }
+  .cal-time-scroll-item:hover {
+    background: #e8edf5;
+  }
+  .cal-time-scroll-item.selected {
+    background: #2f6fb0;
+    color: #fff;
+    font-weight: bold;
+  }
+  .cal-time-separator {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    padding-top: 18px;
+  }
+
+  @media (max-width: 600px) {
+    .top-banner { flex-wrap: wrap; }
+    .field-group { min-width: 100%; }
+    .go-btn { width: 100%; }
+    .login-box { border-radius: 0; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState } = React;
+
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const WEEKDAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+function pad(n) { return n < 10 ? "0" + n : "" + n; }
+function formatDate(d) { return pad(d.getDate()) + "-" + pad(d.getMonth()+1) + "-" + d.getFullYear(); }
+function parseDate(str) {
+  if (!str) return null;
+  const parts = str.split("-");
+  if (parts.length !== 3) return null;
+  return new Date(+parts[2], +parts[1]-1, +parts[0]);
+}
+
+function CalendarPicker({ value, onSelect, onClose, title }) {
+  // Parse "DD-MM-YYYY HH:MM" format
+  let parsed = null;
+  let initialHour = "00";
+  let initialMin = "00";
+  if (value) {
+    const dateTimeParts = value.split(" ");
+    if (dateTimeParts.length === 2) {
+      parsed = parseDate(dateTimeParts[0]);
+      const timeParts = dateTimeParts[1].split(":");
+      if (timeParts.length === 2) {
+        initialHour = timeParts[0];
+        initialMin = timeParts[1];
+      }
+    } else {
+      parsed = parseDate(value);
+    }
+  }
+  const [viewMonth, setViewMonth] = useState(parsed ? parsed.getMonth() : new Date().getMonth());
+  const [viewYear, setViewYear] = useState(parsed ? parsed.getFullYear() : new Date().getFullYear());
+  const [selDate, setSelDate] = useState(parsed ? formatDate(parsed) : "");
+  const [selHour, setSelHour] = useState(initialHour);
+  const [selMin, setSelMin] = useState(initialMin);
+
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+  const todayStr = formatDate(new Date());
+
+  const prevMonth = () => {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(viewYear - 1); }
+    else { setViewMonth(viewMonth - 1); }
+  };
+  const nextMonth = () => {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(viewYear + 1); }
+    else { setViewMonth(viewMonth + 1); }
+  };
+
+  const days = [];
+  const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
+  for (let i = firstDay - 1; i >= 0; i--) {
+    days.push({ day: prevMonthDays - i, other: true });
+  }
+  for (let i = 1; i <= daysInMonth; i++) {
+    days.push({ day: i, other: false });
+  }
+  const remaining = 42 - days.length;
+  for (let i = 1; i <= remaining; i++) {
+    days.push({ day: i, other: true });
+  }
+
+  const handleDayClick = (day, other) => {
+    let targetMonth = viewMonth;
+    let targetYear = viewYear;
+    if (other) {
+      if (day > 15) {
+        targetMonth = viewMonth === 0 ? 11 : viewMonth - 1;
+        targetYear = viewMonth === 0 ? viewYear - 1 : viewYear;
+      } else {
+        targetMonth = viewMonth === 11 ? 0 : viewMonth + 1;
+        targetYear = viewMonth === 11 ? viewYear + 1 : viewYear;
+      }
+      setViewMonth(targetMonth);
+      setViewYear(targetYear);
+    }
+    const selected = formatDate(new Date(targetYear, targetMonth, day));
+    setSelDate(selected);
+  };
+
+  const HOURS = [];
+  for (let h = 0; h < 24; h++) HOURS.push(pad(h));
+  const MINS = [];
+  for (let m = 1; m <= 60; m++) MINS.push(pad(m > 59 ? 0 : m));
+
+  return (
+    <div className="overlay-backdrop" onClick={onClose}>
+      <div className="cal-panel" onClick={e => e.stopPropagation()}>
+        <div className="cal-header">
+          <span className="cal-title">{title || "Select Date & Time"}</span>
+          <button onClick={onClose}>✕</button>
+        </div>
+        <div className="cal-nav">
+          <button onClick={prevMonth}>&lt;</button>
+          <span className="cal-month-year">{MONTHS[viewMonth]} {viewYear}</span>
+          <button onClick={nextMonth}>&gt;</button>
+        </div>
+        <div className="cal-weekdays">
+          {WEEKDAYS.map(d => <div key={d} className="cal-weekday">{d}</div>)}
+        </div>
+        <div className="cal-days">
+          {days.map((d, i) => {
+            const dateStr = d.other ? "" : formatDate(new Date(viewYear, viewMonth, d.day));
+            let cls = "cal-day";
+            if (d.other) cls += " other";
+            if (dateStr === selDate) cls += " selected";
+            if (dateStr === todayStr && dateStr !== selDate) cls += " today";
+            return (
+              <div key={i} className={cls} onClick={() => handleDayClick(d.day, d.other)}>
+                {d.day}
+              </div>
+            );
+          })}
+        </div>
+        <div className="cal-time-section">
+          <div className="cal-time-label">Select Time</div>
+          <div className="cal-time-row">
+            <div className="cal-time-col">
+              <div className="cal-time-col-label">Hour</div>
+              <div className="cal-time-scroll-list">
+                {HOURS.map(h => (
+                  <div key={h} className={"cal-time-scroll-item" + (selHour === h ? " selected" : "")} onClick={() => setSelHour(h)}>{h}</div>
+                ))}
+              </div>
+            </div>
+            <div className="cal-time-separator">:</div>
+            <div className="cal-time-col">
+              <div className="cal-time-col-label">Minute</div>
+              <div className="cal-time-scroll-list">
+                {MINS.map(m => (
+                  <div key={m} className={"cal-time-scroll-item" + (selMin === m ? " selected" : "")} onClick={() => setSelMin(m)}>{m}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="cal-footer">
+          <button onClick={onClose}>Cancel</button>
+          <button className="primary" onClick={() => { if (selDate) onSelect(selDate + " " + selHour + ":" + selMin); onClose(); }}>Select</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const STATE_OPTIONS = ["Andaman and Nicobar Islands","Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chandigarh","Chhattisgarh","Dadra and Nagar Haveli","Daman and Diu","Delhi","Goa","Gujarat","Haryana","Himachal Pradesh","Jammu and Kashmir","Jharkhand","Karnataka","Kerala","Lakshadweep","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Orissa","Pondicherry","Punjab","Rajasthan","Sikkim","Tamil Nadu","Tripura","Uttaranchal","Uttar Pradesh","West Bengal"];
+const SERVICE_OPTIONS = ["VEHICLE TAX COLLECTION (OTHER STATE)","VEHICLE TAX COLLECTION (NCR)"];
+const VEHICLE_PERMIT_TYPES = ["Contract Carriage","Passenger Vehicles","Private Service Vehicle","Goods Vehicle","Stage Carriage","Construction Equipment Vehicle","Temporary Registered Vehicle"];
+const VEHICLE_CLASSES = ["Motorcab","Maxi Cab","Omni Bus","Bus","Sleeper Bus","Light Goods Vehicle","Medium Goods Vehicle","Heavy Goods Vehicle"];
+const SERVICE_TYPES = ["Not Applicable","Ordinary","Air Conditioned","Delux Air Conditioned"];
+const TAX_MODES = ["Days","Monthly","Quarterly"];
+const BORDER_DISTRICTS = ["AMBALA","BHIWANI","CHARKHI DADRI","FARIDABAD","FATEHABAD","GURUGRAM","HISAR","JHAJJAR","JIND","KAITHAL","KARNAL","KURUKSHETRA","MAHENDRAGARH","NUH","PALWAL","PANCHKULA","PANIPAT","REWARI","ROHTAK","SIRSA","SONIPAT","YAMUNA NAGAR"];
+
+function SelectOverlay({ title, options, value, onSelect, onClose }) {
+  return (
+    <div className="overlay-backdrop" onClick={onClose}>
+      <div className="overlay-panel" onClick={e => e.stopPropagation()}>
+        <div className="overlay-header">
+          <span>{title}</span>
+          <button onClick={onClose}>✕</button>
+        </div>
+        <div className="overlay-list">
+          {options.map(opt => (
+            <div key={opt} className="overlay-item" onClick={() => onSelect(opt)}>
+              <span>{opt}</span>
+              <span className={"radio" + (value === opt ? " checked" : "")}></span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FakeSelect({ placeholder, value, onClick }) {
+  return (
+    <div className={"fake-select" + (!value ? " placeholder" : "")} onClick={onClick}>
+      <span>{value || placeholder}</span>
+    </div>
+  );
+}
+
+function Header() {
+  return (
+    <div className="top-banner">
+      <div className="logo-block">
+        <img src="https://upload.wikimedia.org/wikipedia/en/1/17/Digital_India_logo.png" onError={(e)=>{e.target.style.visibility='hidden';}} alt="Digital India" />
+      </div>
+      <div className="ministry-title">
+        MINISTRY OF ROAD TRANSPORT AND HIGHWAYS
+        <div className="sub">Government of India</div>
+      </div>
+      <div className="logo-block">
+        <img src="https://vahan.parivahan.gov.in/vahan4dashboard/img/e-vahan-logo.png" onError={(e)=>{e.target.style.visibility='hidden';}} alt="e-Vahan" />
+      </div>
+    </div>
+  );
+}
+
+function NavBar({ page, onHome, onChangeState }) {
+  return (
+    <div className="nav-bar">
+      {page === "form" && <a onClick={onHome}>🏠 Home</a>}
+      {page === "form" && <a>📄 List</a>}
+      {page === "form" && <a onClick={onChangeState}>🔁 Change State</a>}
+      <a>📋 All Booking</a>
+      <a>🔒 Logout</a>
+    </div>
+  );
+}
+
+function NoticeBar() {
+  return (
+    <div className="notice-bar">
+      ify the validity of the receipt by sending sms <b>VAHAN &lt;STATE CODE&gt;</b> to <b>7738299899</b> (e.g. VAHAN DL CP XXXXXXXX)
+    </div>
+  );
+}
+
+function HomePage({ onGo }) {
+  const [state, setState] = useState("");
+  const [service, setService] = useState("");
+  const [overlay, setOverlay] = useState(null);
+
+  const handleGo = () => {
+    if (!state || !service) {
+      alert("Please select both State and Service Name");
+      return;
+    }
+    onGo(state, service);
+  };
+
+  return (
+    <div className="form-section">
+      <div className="form-box">
+        <div className="form-box-header">Select State Name for Tax Payment</div>
+        <div className="form-box-body">
+          <div className="field-group">
+            <label>Select Visiting State Name</label>
+            <FakeSelect placeholder="Please select State" value={state} onClick={() => setOverlay("state")} />
+          </div>
+          <div className="field-group">
+            <label>Service Name</label>
+            <FakeSelect placeholder="Please select Service Name" value={service} onClick={() => setOverlay("service")} />
+          </div>
+          <button className="go-btn" onClick={handleGo}>Go</button>
+        </div>
+      </div>
+
+      {overlay === "state" && (
+        <SelectOverlay
+          title="Select Visiting State Name"
+          options={STATE_OPTIONS}
+          value={state}
+          onSelect={(v) => { setState(v); setOverlay(null); }}
+          onClose={() => setOverlay(null)}
+        />
+      )}
+      {overlay === "service" && (
+        <SelectOverlay
+          title="Select Service Name"
+          options={SERVICE_OPTIONS}
+          value={service}
+          onSelect={(v) => { setService(v); setOverlay(null); }}
+          onClose={() => setOverlay(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function Instructions() {
+  return (
+    <div className="instructions">
+      <h3>Follow these steps to initiate tax payment.</h3>
+      <ol>
+        <li>Select the state where you want to go from <b>'Select State'</b> combo box.</li>
+        <li>
+          Select service Name from <b>'Service Name'</b> combo box.
+          <ol>
+            <li>Select <b>'VEHICLE TAX COLLECTION (OTHER STATE)'</b> in case you do not have NCR permit.</li>
+            <li>Select <b>'VEHICLE TAX COLLECTION (NCR)'</b> in case you have NCR permit.</li>
+          </ol>
+        </li>
+        <li>Click <b>'Go'</b> button to open the vehicle details form.</li>
+        <li>Enter <b>'Vehicle No.'</b> and click <b>'Get Details'</b> button to fill the details.</li>
+        <li>Fill rest of the fields which are not filled automatically.</li>
+        <li>In case fields are not filled automatically then enter the details manually.</li>
+        <li>Click <b>'Calculate Tax'</b> button to calculate the tax according to state notification.</li>
+        <li>Click <b>'Pay Tax'</b> button to pay the calculated tax.</li>
+        <li>It opens the payment gateway of VAHAN.</li>
+      </ol>
+    </div>
+  );
+}
+
+function LoginPage({ onLogin }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (username === "8306332328taxindia" && password === "8306332328admin") {
+      setError("");
+      onLogin();
+    } else {
+      setError("Invalid Username or Password. Please try again.");
+    }
+  };
+
+  return (
+    <div className="login-page">
+      <div className="hero-banner login-hero-banner"><img src="banner.png" alt="Banner" onError={(e)=>{e.target.style.display='none';}} /></div>
+      <div className="login-box">
+        <div className="login-header">
+          <h2>Border Tax Payment</h2>
+          <p>Ministry of Road Transport and Highways, Government of India</p>
+        </div>
+        <form className="login-body" onSubmit={handleSubmit}>
+          <div className={"login-error" + (error ? " show" : "")}>{error}</div>
+          <div className="login-field">
+            <label>Username</label>
+            <input
+              type="text"
+              placeholder="Enter Username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <div className="login-field">
+            <label>Password</label>
+            <input
+              type="password"
+              placeholder="Enter Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
+          </div>
+          <button type="submit" className="login-btn">Sign In</button>
+        </form>
+        <div className="login-footer">
+          &copy; 2026 Ministry of Road Transport and Highways. All rights reserved.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LabeledField({ label, required, children }) {
+  return (
+    <div className="field-group">
+      <label>{label} {required && <span className="req">*</span>}</label>
+      {children}
+    </div>
+  );
+}
+
+function TaxFormPage({ stateName }) {
+  const [vehicleNo, setVehicleNo] = useState("");
+  const [chassisNo, setChassisNo] = useState("");
+  const [ownerName, setOwnerName] = useState("");
+  const [mobileNo, setMobileNo] = useState("");
+  const [fromState, setFromState] = useState("");
+  const [permitType, setPermitType] = useState("");
+  const [vehicleClass, setVehicleClass] = useState("");
+  const [seatingCapacity, setSeatingCapacity] = useState("");
+  const [serviceType, setServiceType] = useState("");
+  const [distance, setDistance] = useState("");
+  const [taxMode, setTaxMode] = useState("");
+  const [borderDistrict, setBorderDistrict] = useState("");
+  const [taxFromDate, setTaxFromDate] = useState("");
+  const [taxUptoDate, setTaxUptoDate] = useState("");
+  const [totalAmount, setTotalAmount] = useState("");
+  const [overlay, setOverlay] = useState(null);
+  const [calOverlay, setCalOverlay] = useState(null); // "from" | "upto" | null
+
+  const overlayMap = {
+    fromState: { title: "Select From State", options: STATE_OPTIONS, value: fromState, set: setFromState },
+    permitType: { title: "Select Vehicle Permit Type", options: VEHICLE_PERMIT_TYPES, value: permitType, set: setPermitType },
+    vehicleClass: { title: "Select Vehicle Class", options: VEHICLE_CLASSES, value: vehicleClass, set: setVehicleClass },
+    serviceType: { title: "Select Service Type", options: SERVICE_TYPES, value: serviceType, set: setServiceType },
+    taxMode: { title: "Select Tax Mode", options: TAX_MODES, value: taxMode, set: setTaxMode },
+    borderDistrict: { title: "Select District/Barrier", options: BORDER_DISTRICTS, value: borderDistrict, set: setBorderDistrict },
+  };
+
+  return (
+    <div className="form-section">
+      <div className="title-bar" style={{marginBottom: 14}}>VEHICLE TAX PAYMENT FOR, {stateName.toUpperCase()}</div>
+
+      <div className="form-box">
+        <div className="form-box-header">Tax Payment Details</div>
+        <div className="form-box-body" style={{flexDirection: "column", alignItems: "stretch"}}>
+
+          <div style={{display:"flex", gap:16, flexWrap:"wrap", alignItems:"flex-end"}}>
+            <LabeledField label="Vehicle No." required>
+              <input value={vehicleNo} onChange={e => setVehicleNo(e.target.value)} />
+            </LabeledField>
+            <button className="action-btn" style={{marginBottom: 2}}>Get Details</button>
+          </div>
+
+          <div style={{display:"flex", gap:16, flexWrap:"wrap"}}>
+            <LabeledField label="Chassis No." required>
+              <input value={chassisNo} onChange={e => setChassisNo(e.target.value)} />
+            </LabeledField>
+            <LabeledField label="Owner Name" required>
+              <input value={ownerName} onChange={e => setOwnerName(e.target.value)} />
+            </LabeledField>
+          </div>
+
+          <div style={{display:"flex", gap:16, flexWrap:"wrap"}}>
+            <LabeledField label="Mobile No." required>
+              <input value={mobileNo} onChange={e => setMobileNo(e.target.value)} />
+            </LabeledField>
+            <LabeledField label="From State" required>
+              <FakeSelect placeholder="---Select State---" value={fromState} onClick={() => setOverlay("fromState")} />
+            </LabeledField>
+          </div>
+
+          <div style={{display:"flex", gap:16, flexWrap:"wrap"}}>
+            <LabeledField label="Vehicle Permit Type" required>
+              <FakeSelect placeholder="-- Select Vehicle Type --" value={permitType} onClick={() => setOverlay("permitType")} />
+            </LabeledField>
+            <LabeledField label="Vehicle Class" required>
+              <FakeSelect placeholder="-- Select Vehicle Class --" value={vehicleClass} onClick={() => setOverlay("vehicleClass")} />
+            </LabeledField>
+          </div>
+
+          <div style={{display:"flex", gap:16, flexWrap:"wrap"}}>
+            <LabeledField label="Seating Capacity (Excluding Driver)" required>
+              <input value={seatingCapacity} onChange={e => setSeatingCapacity(e.target.value)} />
+            </LabeledField>
+            <LabeledField label="Service Type" required>
+              <FakeSelect placeholder="-- Select Service Type --" value={serviceType} onClick={() => setOverlay("serviceType")} />
+            </LabeledField>
+          </div>
+
+          <div style={{display:"flex", gap:16, flexWrap:"wrap"}}>
+            <LabeledField label="Distance (In KM)" required>
+              <input value={distance} onChange={e => setDistance(e.target.value)} />
+            </LabeledField>
+            <LabeledField label="Tax Mode" required>
+              <FakeSelect placeholder="-- Select Tax Mode --" value={taxMode} onClick={() => setOverlay("taxMode")} />
+            </LabeledField>
+          </div>
+
+          <div style={{display:"flex", gap:16, flexWrap:"wrap"}}>
+            <LabeledField label="Border/Barrier District through Entering" required>
+              <FakeSelect placeholder="--Select District/Barrier--" value={borderDistrict} onClick={() => setOverlay("borderDistrict")} />
+            </LabeledField>
+            <LabeledField label="Tax From Date" required>
+              <FakeSelect placeholder="DD-MM-YYYY HH:MM" value={taxFromDate} onClick={() => setCalOverlay("from")} />
+            </LabeledField>
+            <LabeledField label="Tax Upto Date" required>
+              <FakeSelect placeholder="DD-MM-YYYY HH:MM" value={taxUptoDate} onClick={() => setCalOverlay("upto")} />
+            </LabeledField>
+          </div>
+
+          <table className="tax-table">
+            <thead>
+              <tr>
+                <th>Sl. No.</th>
+                <th>Particulars</th>
+                <th>Tax From</th>
+                <th>Tax Upto</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colSpan="5">No records found.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div className="total-row">
+            <label>Total Amount</label>
+            <input value={totalAmount} onChange={e => setTotalAmount(e.target.value)} />
+          </div>
+
+          <div className="btn-row">
+            <button className="action-btn">Calculate Tax</button>
+            <button className="action-btn secondary" style={{border:"1px solid #2f6fb0"}}>Pay Tax</button>
+            <button className="action-btn reset">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      {overlay && overlayMap[overlay] && (
+        <SelectOverlay
+          title={overlayMap[overlay].title}
+          options={overlayMap[overlay].options}
+          value={overlayMap[overlay].value}
+          onSelect={(v) => { overlayMap[overlay].set(v); setOverlay(null); }}
+          onClose={() => setOverlay(null)}
+        />
+      )}
+
+      {calOverlay === "from" && (
+        <CalendarPicker
+          title="Select Tax From Date"
+          value={taxFromDate}
+          onSelect={(v) => { setTaxFromDate(v); setCalOverlay(null); }}
+          onClose={() => setCalOverlay(null)}
+        />
+      )}
+      {calOverlay === "upto" && (
+        <CalendarPicker
+          title="Select Tax Upto Date"
+          value={taxUptoDate}
+          onSelect={(v) => { setTaxUptoDate(v); setCalOverlay(null); }}
+          onClose={() => setCalOverlay(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [page, setPage] = useState("home");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedService, setSelectedService] = useState("");
+
+  if (!loggedIn) {
+    return <LoginPage onLogin={() => setLoggedIn(true)} />;
+  }
+
+  const handleGo = (state, service) => {
+    setSelectedState(state);
+    setSelectedService(service);
+    setPage("form");
+  };
+
+  return (
+    <div className="page-wrap">
+      <div className="hero-banner"><img src="banner.png" alt="Banner" onError={(e)=>{e.target.style.display='none';}} /></div>
+      <Header />
+      <NavBar page={page} onHome={() => setPage("home")} onChangeState={() => setPage("home")} />
+      <NoticeBar />
+      {page === "home" && (
+        <React.Fragment>
+          <div className="title-bar">BORDER TAX PAYMENT</div>
+          <div className="payment-bar">Total Payment :&nbsp; 28863</div>
+          <HomePage onGo={handleGo} />
+          <Instructions />
+        </React.Fragment>
+      )}
+      {page === "form" && <TaxFormPage stateName={selectedState} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
