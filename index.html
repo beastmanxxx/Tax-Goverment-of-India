@@ -1,0 +1,2349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Border Tax Payment</title>
+<meta name="viewport" content="width=1100" />
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  html { font-size: 16px; }
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #e9edf2;
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+  }
+  .hero-banner {
+    width: 100%;
+    display: block;
+  }
+  .hero-banner img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .page-wrap {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #ccc;
+    min-height: 100vh;
+    box-shadow: 0 0 20px rgba(0,0,0,0.06);
+    position: relative;
+  }
+  .top-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: clamp(8px,1.5vw,16px) clamp(12px,3vw,32px);
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+  }
+  .top-banner .logo-block {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: clamp(10px,1vw,13px);
+  }
+  .top-banner img { height: clamp(34px,4vw,56px); }
+  .ministry-title {
+    text-align: center;
+    flex: 1;
+    font-size: clamp(13px,1.8vw,22px);
+    font-weight: bold;
+    color: #222;
+    line-height: 1.3;
+  }
+  .ministry-title .sub {
+    font-weight: normal;
+    font-size: clamp(11px,1.3vw,16px);
+  }
+  .nav-bar {
+    background: #f2f2f2;
+    border-bottom: 1px solid #ddd;
+    padding: clamp(6px,1vw,10px) clamp(12px,3vw,32px);
+    display: flex;
+    gap: clamp(14px,2vw,28px);
+    font-size: clamp(11px,1.1vw,15px);
+    flex-wrap: wrap;
+  }
+  .nav-bar a {
+    color: #1a4fa0;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  .nav-bar a:hover { text-decoration: underline; }
+  .notice-bar {
+    background: #fff3cd;
+    color: #7a5b00;
+    font-size: clamp(10px,1vw,14px);
+    padding: clamp(5px,1vw,10px) clamp(12px,3vw,32px);
+    border-bottom: 1px solid #f0dca0;
+  }
+  .notice-bar b { color: #b30000; }
+  .title-bar {
+    background: #2f6fb0;
+    color: #fff;
+    text-align: center;
+    font-weight: bold;
+    font-size: clamp(14px,1.6vw,20px);
+    padding: clamp(8px,1.2vw,14px);
+    letter-spacing: 0.5px;
+  }
+  .payment-bar {
+    background: #12305c;
+    color: #fff;
+    text-align: center;
+    font-weight: bold;
+    font-size: clamp(14px,1.6vw,20px);
+    padding: clamp(8px,1.2vw,14px);
+  }
+  .form-section {
+    padding: clamp(10px,2vw,24px) clamp(12px,3vw,32px);
+  }
+  .form-box {
+    border: 1px solid #cfd8e3;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .form-box-header {
+    background: #e7edf5;
+    padding: clamp(8px,1.2vw,14px) clamp(10px,2vw,20px);
+    font-weight: bold;
+    font-size: clamp(13px,1.3vw,17px);
+    color: #1a3a63;
+    border-bottom: 1px solid #cfd8e3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .form-box-body {
+    padding: clamp(12px,2.2vw,26px);
+    display: flex;
+    gap: clamp(10px,2vw,24px);
+    align-items: flex-end;
+    flex-wrap: wrap;
+    background: #fbfcfe;
+  }
+  .field-group {
+    flex: 1;
+    min-width: 220px;
+  }
+  .field-group label {
+    display: block;
+    font-size: clamp(12px,1.1vw,15px);
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: #333;
+  }
+  .field-group label .req { color: #c0392b; }
+  .field-group select, .field-group input {
+    width: 100%;
+    padding: clamp(6px,1vw,10px) 8px;
+    font-size: clamp(12px,1.1vw,15px);
+    border: 1px solid #b7c3d0;
+    border-radius: 3px;
+    background: #fff;
+    color: #555;
+  }
+  .fake-select {
+    width: 100%;
+    padding: clamp(6px,1vw,10px) 8px;
+    font-size: clamp(12px,1.1vw,15px);
+    border: 1px solid #b7c3d0;
+    border-radius: 3px;
+    background-color: #fff;
+    color: #555;
+    cursor: pointer;
+    user-select: none;
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .fake-select.placeholder { color: #8a94a3; }
+  .fake-select::after {
+    content: "▾";
+    color: #667;
+    margin-left: 8px;
+  }
+  .go-btn, .action-btn {
+    background: linear-gradient(#3f7fc1, #2f6fb0);
+    color: #fff;
+    border: 1px solid #2a5a92;
+    padding: clamp(7px,1vw,11px) clamp(20px,2.5vw,36px);
+    font-size: clamp(12px,1.1vw,15px);
+    font-weight: bold;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .go-btn:hover, .action-btn:hover { background: #2f6fb0; }
+  .action-btn.secondary {
+    background: #fff;
+    color: #2f6fb0;
+  }
+  .action-btn.reset {
+    background: linear-gradient(#eee, #ddd);
+    color: #333;
+    border: 1px solid #bbb;
+  }
+  .instructions {
+    padding: clamp(10px,2vw,24px) clamp(16px,3.5vw,40px) clamp(24px,3vw,40px);
+  }
+  .instructions h3 {
+    font-size: clamp(13px,1.3vw,17px);
+    color: #12305c;
+    margin: 6px 0 12px;
+  }
+  .instructions ol {
+    margin: 0;
+    padding-left: 20px;
+    font-size: clamp(12px,1.1vw,15px);
+    line-height: 1.9;
+    color: #333;
+  }
+  .instructions ol ol {
+    list-style-type: lower-alpha;
+    margin-top: 4px;
+  }
+  .instructions b { color: #12305c; }
+
+  .overlay-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  .overlay-panel {
+    background: #fff;
+    width: 100%;
+    max-width: 420px;
+    max-height: 82vh;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  }
+  .overlay-header {
+    padding: 14px 18px;
+    font-weight: bold;
+    font-size: 15px;
+    color: #12305c;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f7f9fc;
+  }
+  .overlay-header button {
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    cursor: pointer;
+    color: #666;
+    line-height: 1;
+  }
+  .overlay-list {
+    overflow-y: auto;
+  }
+  .overlay-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 18px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    font-size: 15px;
+    color: #222;
+  }
+  .overlay-item:hover { background: #f5f8fc; }
+  .radio {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #9aa5b1;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .radio.checked { border-color: #2f6fb0; }
+  .radio.checked::after {
+    content: "";
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #2f6fb0;
+  }
+
+  .tax-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+    font-size: clamp(11px,1vw,14px);
+  }
+  .tax-table th {
+    background: #e7edf5;
+    color: #1a3a63;
+    padding: 8px;
+    border: 1px solid #cfd8e3;
+    text-align: left;
+  }
+  .tax-table td {
+    padding: 10px 8px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    color: #666;
+  }
+  .total-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .total-row label {
+    font-weight: bold;
+    font-size: clamp(12px,1.1vw,15px);
+    white-space: nowrap;
+  }
+  .total-row input {
+    max-width: 200px;
+    padding: clamp(6px,1vw,10px) 8px;
+    border: 1px solid #b7c3d0;
+    border-radius: 3px;
+  }
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  /* Login Page */
+  .login-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #e9edf2;
+    padding: 0;
+  }
+  .login-hero-banner {
+    width: 100%;
+    max-width: 1100px;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+  .login-box {
+    background: #fff;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    overflow: hidden;
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+  .login-header {
+    background: #12305c;
+    color: #fff;
+    text-align: center;
+    padding: clamp(18px,3vw,28px) 20px;
+  }
+  .login-header h2 {
+    margin: 0 0 4px;
+    font-size: clamp(18px,2.2vw,24px);
+  }
+  .login-header p {
+    margin: 0;
+    font-size: clamp(12px,1.1vw,14px);
+    opacity: 0.8;
+  }
+  .login-body {
+    padding: clamp(20px,3vw,32px);
+  }
+  .login-field {
+    margin-bottom: 18px;
+  }
+  .login-field label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 6px;
+  }
+  .login-field input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: 1px solid #b7c3d0;
+    border-radius: 4px;
+    background: #f9fafb;
+    color: #333;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .login-field input:focus {
+    outline: none;
+    border-color: #2f6fb0;
+    box-shadow: 0 0 0 3px rgba(47,111,176,0.15);
+    background: #fff;
+  }
+  .login-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(#3f7fc1, #2f6fb0);
+    border: 1px solid #2a5a92;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 6px;
+  }
+  .login-btn:hover { background: #2f6fb0; }
+  .login-error {
+    background: #fde8e8;
+    color: #b91c1c;
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+    border: 1px solid #f5c6c6;
+    display: none;
+  }
+  .login-error.show { display: block; }
+  .login-footer {
+    text-align: center;
+    padding: 14px 20px;
+    border-top: 1px solid #eee;
+    font-size: 12px;
+    color: #888;
+  }
+  .preview-page .login-footer {
+    width: 100%;
+    max-width: 820px;
+    margin: 0 auto 20px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  /* Calendar Picker */
+  .cal-panel {
+    background: #fff;
+    width: 100%;
+    max-width: 340px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  }
+  .cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: #12305c;
+    color: #fff;
+  }
+  .cal-header .cal-title {
+    font-weight: bold;
+    font-size: 15px;
+  }
+  .cal-header button {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    line-height: 1;
+  }
+  .cal-header button:hover { background: rgba(255,255,255,0.15); }
+  .cal-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid #eee;
+  }
+  .cal-nav button {
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #2f6fb0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+  .cal-nav button:hover { background: #eef3f9; }
+  .cal-nav .cal-month-year {
+    font-weight: bold;
+    font-size: 15px;
+    color: #222;
+  }
+  .cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 8px 12px 4px;
+    background: #f7f9fc;
+  }
+  .cal-weekday {
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #666;
+    padding: 4px 0;
+  }
+  .cal-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 4px 12px 14px;
+    gap: 2px;
+  }
+  .cal-day {
+    text-align: center;
+    padding: 7px 0;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 6px;
+    color: #333;
+    transition: background 0.15s;
+  }
+  .cal-day:hover { background: #e8edf5; }
+  .cal-day.other { color: #bbb; }
+  .cal-day.selected {
+    background: #2f6fb0;
+    color: #fff;
+    font-weight: bold;
+  }
+  .cal-day.today {
+    border: 1px solid #2f6fb0;
+  }
+  .cal-day.selected.today { border: none; }
+  .cal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 16px;
+    border-top: 1px solid #eee;
+    gap: 8px;
+  }
+  .cal-footer button {
+    padding: 6px 16px;
+    font-size: 13px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #b7c3d0;
+    background: #fff;
+    color: #333;
+  }
+  .cal-footer button:hover { background: #f5f5f5; }
+  .cal-footer button.primary {
+    background: #2f6fb0;
+    color: #fff;
+    border-color: #2a5a92;
+  }
+  .cal-footer button.primary:hover { background: #1e5a94; }
+
+  .cal-time-section {
+    padding: 12px 16px;
+    border-top: 1px solid #eee;
+    background: #f7f9fc;
+  }
+  .cal-time-label {
+    font-weight: bold;
+    font-size: 13px;
+    color: #12305c;
+    margin-bottom: 8px;
+  }
+  .cal-time-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cal-time-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .cal-time-col-label {
+    font-size: 11px;
+    color: #666;
+    font-weight: bold;
+  }
+  .cal-time-scroll-list {
+    height: 120px;
+    overflow-y: auto;
+    border: 1px solid #b7c3d0;
+    border-radius: 4px;
+    background: #fff;
+  }
+  .cal-time-scroll-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  .cal-time-scroll-list::-webkit-scrollbar-thumb {
+    background: #aab;
+    border-radius: 3px;
+  }
+  .cal-time-scroll-item {
+    padding: 7px 10px;
+    font-size: 14px;
+    text-align: center;
+    cursor: pointer;
+    color: #333;
+    transition: background 0.15s;
+  }
+  .cal-time-scroll-item:hover {
+    background: #e8edf5;
+  }
+  .cal-time-scroll-item.selected {
+    background: #2f6fb0;
+    color: #fff;
+    font-weight: bold;
+  }
+  .cal-time-separator {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    padding-top: 18px;
+  }
+
+  /* Mobile responsive overrides removed to keep desktop layout on all devices */
+
+  /* ===== Receipt PDF Styles ===== */
+  .receipt-wrapper {
+    width: 794px;
+    min-height: 1123px;
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    position: relative;
+    overflow: hidden;
+    padding: 40px 50px 45px;
+    color: #222;
+  }
+  .receipt-watermark-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .receipt-watermark-text {
+    position: absolute;
+    font-size: 28px;
+    color: rgba(0,0,0,0.04);
+    transform: rotate(-35deg);
+    white-space: nowrap;
+    font-weight: bold;
+    line-height: 1.6;
+    text-align: center;
+  }
+  .receipt-stamp-watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 300px;
+    opacity: 0.15;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .receipt-content {
+    position: relative;
+    z-index: 1;
+  }
+  .receipt-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #444;
+  }
+  .receipt-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+  .receipt-emblem {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+  }
+  .receipt-header-center {
+    flex: 2;
+    text-align: center;
+  }
+  .receipt-header-center h1 {
+    margin: 0;
+    font-size: 20px;
+    color: #222;
+    letter-spacing: 0.5px;
+  }
+  .receipt-header-center h2 {
+    margin: 2px 0 0;
+    font-size: 16px;
+    color: #444;
+    font-weight: normal;
+  }
+  .receipt-header-center h3 {
+    margin: 4px 0 0;
+    font-size: 18px;
+    color: #222;
+    font-weight: bold;
+  }
+  .receipt-header-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  #qr-code-canvas {
+    width: 110px;
+    height: 110px;
+  }
+  #qr-code-canvas img {
+    width: 110px !important;
+    height: 110px !important;
+  }
+  #qr-code-canvas canvas {
+    width: 110px !important;
+    height: 110px !important;
+  }
+
+  .receipt-details {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 30px;
+    margin-top: 16px;
+  }
+  .receipt-details-col {
+    flex: 1;
+  }
+  .receipt-detail-row {
+    display: flex;
+    padding: 8px 0;
+    font-size: 12px;
+    line-height: 1.7;
+    border-bottom: 1px dotted #ddd;
+  }
+  .receipt-detail-row:last-child {
+    border-bottom: none;
+  }
+  .receipt-detail-label {
+    font-weight: bold;
+    color: #333;
+    min-width: 190px;
+    flex-shrink: 0;
+  }
+  .receipt-detail-value {
+    color: #333;
+    font-weight: normal;
+  }
+  .receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 12px;
+  }
+  .receipt-table th {
+    background: #444;
+    color: #fff;
+    padding: 12px 14px;
+    border: 1px solid #444;
+    text-align: left;
+    font-size: 12px;
+  }
+  .receipt-table td {
+    padding: 12px 14px;
+    border: 1px solid #b7c3d0;
+    text-align: center;
+    color: #333;
+  }
+  .receipt-table td:first-child {
+    text-align: left;
+  }
+  .receipt-grand-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #e7edf5;
+    border: 1px solid #b7c3d0;
+    border-radius: 3px;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+  .receipt-grand-total .amount {
+    font-weight: bold;
+    color: #222;
+    font-size: 15px;
+  }
+  .receipt-footer {
+    margin-top: 30px;
+    padding-top: 18px;
+    border-top: 1px solid #ddd;
+    font-size: 11px;
+    color: #666;
+    line-height: 1.9;
+  }
+  .receipt-footer b {
+    color: #333;
+  }
+
+  /* ===== Preview Page Styles ===== */
+  .preview-page {
+    min-height: 100vh;
+    background: #e9edf2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .preview-banner {
+    width: 100%;
+    max-width: 1100px;
+  }
+  .preview-banner img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .preview-content {
+    width: 100%;
+    max-width: 820px;
+    background: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    margin: 20px auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .preview-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #12305c;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .preview-pdf-wrapper {
+    width: 100%;
+    border: 1px solid #ddd;
+    overflow: auto;
+    margin-bottom: 20px;
+    background: #f9f9f9;
+  }
+  .preview-pdf-wrapper .receipt-wrapper {
+    position: relative;
+    transform-origin: top left;
+    width: 794px;
+    margin: 0 auto;
+  }
+  .preview-download-btn {
+    background: linear-gradient(#3f7fc1, #2f6fb0);
+    color: #fff;
+    border: 1px solid #2a5a92;
+    padding: 14px 48px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .preview-download-btn:hover { background: #2f6fb0; }
+  .preview-print-btn {
+    background: linear-gradient(#555, #444);
+    color: #fff;
+    border: 1px solid #333;
+    padding: 14px 48px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .preview-print-btn:hover { background: #444; }
+  .preview-btn-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .preview-back-btn {
+    background: #fff;
+    color: #2f6fb0;
+    border: 1px solid #2f6fb0;
+    padding: 10px 32px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+  .preview-back-btn:hover { background: #f0f5fa; }
+
+  /* ===== Records List Styles ===== */
+  .records-section {
+    margin-top: 20px;
+  }
+  .records-section .form-box-body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .records-search {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .records-search input {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #b7c3d0;
+    border-radius: 3px;
+  }
+  .records-table-wrap {
+    overflow-x: auto;
+  }
+  .records-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: clamp(11px,1vw,13px);
+  }
+  .records-table th {
+    background: #e7edf5;
+    color: #1a3a63;
+    padding: 8px 6px;
+    border: 1px solid #cfd8e3;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .records-table td {
+    padding: 8px 6px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    color: #333;
+  }
+  .records-table .view-btn {
+    background: #2f6fb0;
+    color: #fff;
+    border: none;
+    padding: 4px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  .records-table .view-btn:hover { background: #1e5a94; }
+
+  /* ===== Admin Panel Styles ===== */
+  .admin-panel {
+    background: #fff;
+    width: 100%;
+    max-width: 440px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  }
+  .admin-header {
+    background: #12305c;
+    color: #fff;
+    padding: 16px 20px;
+    font-weight: bold;
+    font-size: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .admin-header button {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .admin-body {
+    padding: 20px;
+  }
+  .admin-field {
+    margin-bottom: 14px;
+  }
+  .admin-field label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 6px;
+  }
+  .admin-field input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #b7c3d0;
+    border-radius: 4px;
+  }
+  .admin-add-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(#3f7fc1, #2f6fb0);
+    border: 1px solid #2a5a92;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .admin-add-btn:hover { background: #2f6fb0; }
+  .admin-msg {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    display: none;
+  }
+  .admin-msg.show { display: block; }
+  .admin-msg.success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+  }
+  .admin-msg.error {
+    background: #fde8e8;
+    color: #b91c1c;
+    border: 1px solid #f5c6c6;
+  }
+  .admin-user-list {
+    margin-top: 16px;
+    border-top: 1px solid #eee;
+    padding-top: 12px;
+  }
+  .admin-user-list h4 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: #12305c;
+  }
+  .admin-user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 13px;
+  }
+  .admin-user-item .uname { color: #333; font-weight: bold; flex: 1; }
+  .admin-user-item .btn-group {
+    display: flex;
+    gap: 6px;
+  }
+  .admin-user-item .edit-btn {
+    background: #ff9800;
+    color: #fff;
+    border: none;
+    padding: 3px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
+  }
+  .admin-user-item .edit-btn:hover { background: #f57c00; }
+  .admin-user-item .del-btn {
+    background: #f44336;
+    color: #fff;
+    border: none;
+    padding: 3px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
+  }
+  .admin-user-item .del-btn:hover { background: #d32f2f; }
+  .admin-edit-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .admin-edit-row input {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 13px;
+    border: 1px solid #b7c3d0;
+    border-radius: 4px;
+  }
+  .admin-edit-row .save-btn {
+    background: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  .admin-edit-row .save-btn:hover { background: #388e3c; }
+  .admin-edit-row .cancel-btn {
+    background: #9e9e9e;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  .admin-edit-row .cancel-btn:hover { background: #757575; }
+</style>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyB0oSbc3QQ1NeDcR7s0BGaqjymq8PeduLA",
+    authDomain: "tax-gov-india.firebaseapp.com",
+    projectId: "tax-gov-india",
+    storageBucket: "tax-gov-india.firebasestorage.app",
+    messagingSenderId: "448799367397",
+    appId: "1:448799367397:web:d25ccf6e78c6ff715e740c"
+  };
+  firebase.initializeApp(firebaseConfig);
+</script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const WEEKDAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+function pad(n) { return n < 10 ? "0" + n : "" + n; }
+function formatDate(d) { return pad(d.getDate()) + "-" + pad(d.getMonth()+1) + "-" + d.getFullYear(); }
+function parseDate(str) {
+  if (!str) return null;
+  const parts = str.split("-");
+  if (parts.length !== 3) return null;
+  return new Date(+parts[2], +parts[1]-1, +parts[0]);
+}
+
+function CalendarPicker({ value, onSelect, onClose, title }) {
+  // Parse "DD-MM-YYYY HH:MM" format
+  let parsed = null;
+  let initialHour = "00";
+  let initialMin = "00";
+  if (value) {
+    const dateTimeParts = value.split(" ");
+    if (dateTimeParts.length === 2) {
+      parsed = parseDate(dateTimeParts[0]);
+      const timeParts = dateTimeParts[1].split(":");
+      if (timeParts.length === 2) {
+        initialHour = timeParts[0];
+        initialMin = timeParts[1];
+      }
+    } else {
+      parsed = parseDate(value);
+    }
+  }
+  const [viewMonth, setViewMonth] = useState(parsed ? parsed.getMonth() : new Date().getMonth());
+  const [viewYear, setViewYear] = useState(parsed ? parsed.getFullYear() : new Date().getFullYear());
+  const [selDate, setSelDate] = useState(parsed ? formatDate(parsed) : "");
+  const [selHour, setSelHour] = useState(initialHour);
+  const [selMin, setSelMin] = useState(initialMin);
+
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+  const todayStr = formatDate(new Date());
+
+  const prevMonth = () => {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(viewYear - 1); }
+    else { setViewMonth(viewMonth - 1); }
+  };
+  const nextMonth = () => {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(viewYear + 1); }
+    else { setViewMonth(viewMonth + 1); }
+  };
+
+  const days = [];
+  const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
+  for (let i = firstDay - 1; i >= 0; i--) {
+    days.push({ day: prevMonthDays - i, other: true });
+  }
+  for (let i = 1; i <= daysInMonth; i++) {
+    days.push({ day: i, other: false });
+  }
+  const remaining = 42 - days.length;
+  for (let i = 1; i <= remaining; i++) {
+    days.push({ day: i, other: true });
+  }
+
+  const handleDayClick = (day, other) => {
+    let targetMonth = viewMonth;
+    let targetYear = viewYear;
+    if (other) {
+      if (day > 15) {
+        targetMonth = viewMonth === 0 ? 11 : viewMonth - 1;
+        targetYear = viewMonth === 0 ? viewYear - 1 : viewYear;
+      } else {
+        targetMonth = viewMonth === 11 ? 0 : viewMonth + 1;
+        targetYear = viewMonth === 11 ? viewYear + 1 : viewYear;
+      }
+      setViewMonth(targetMonth);
+      setViewYear(targetYear);
+    }
+    const selected = formatDate(new Date(targetYear, targetMonth, day));
+    setSelDate(selected);
+  };
+
+  const HOURS = [];
+  for (let h = 0; h < 24; h++) HOURS.push(pad(h));
+  const MINS = [];
+  for (let m = 1; m <= 60; m++) MINS.push(pad(m > 59 ? 0 : m));
+
+  return (
+    <div className="overlay-backdrop" onClick={onClose}>
+      <div className="cal-panel" onClick={e => e.stopPropagation()}>
+        <div className="cal-header">
+          <span className="cal-title">{title || "Select Date & Time"}</span>
+          <button onClick={onClose}>✕</button>
+        </div>
+        <div className="cal-nav">
+          <button onClick={prevMonth}>&lt;</button>
+          <span className="cal-month-year">{MONTHS[viewMonth]} {viewYear}</span>
+          <button onClick={nextMonth}>&gt;</button>
+        </div>
+        <div className="cal-weekdays">
+          {WEEKDAYS.map(d => <div key={d} className="cal-weekday">{d}</div>)}
+        </div>
+        <div className="cal-days">
+          {days.map((d, i) => {
+            const dateStr = d.other ? "" : formatDate(new Date(viewYear, viewMonth, d.day));
+            let cls = "cal-day";
+            if (d.other) cls += " other";
+            if (dateStr === selDate) cls += " selected";
+            if (dateStr === todayStr && dateStr !== selDate) cls += " today";
+            return (
+              <div key={i} className={cls} onClick={() => handleDayClick(d.day, d.other)}>
+                {d.day}
+              </div>
+            );
+          })}
+        </div>
+        <div className="cal-time-section">
+          <div className="cal-time-label">Select Time</div>
+          <div className="cal-time-row">
+            <div className="cal-time-col">
+              <div className="cal-time-col-label">Hour</div>
+              <div className="cal-time-scroll-list">
+                {HOURS.map(h => (
+                  <div key={h} className={"cal-time-scroll-item" + (selHour === h ? " selected" : "")} onClick={() => setSelHour(h)}>{h}</div>
+                ))}
+              </div>
+            </div>
+            <div className="cal-time-separator">:</div>
+            <div className="cal-time-col">
+              <div className="cal-time-col-label">Minute</div>
+              <div className="cal-time-scroll-list">
+                {MINS.map(m => (
+                  <div key={m} className={"cal-time-scroll-item" + (selMin === m ? " selected" : "")} onClick={() => setSelMin(m)}>{m}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="cal-footer">
+          <button onClick={onClose}>Cancel</button>
+          <button className="primary" onClick={() => { if (selDate) onSelect(selDate + " " + selHour + ":" + selMin); onClose(); }}>Select</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const STATE_OPTIONS = ["ANDAMAN AND NICOBAR ISLANDS","ANDHRA PRADESH","ARUNACHAL PRADESH","ASSAM","BIHAR","CHANDIGARH","CHHATTISGARH","DADRA AND NAGAR HAVELI","DAMAN AND DIU","DELHI","GOA","GUJARAT","HARYANA","HIMACHAL PRADESH","JAMMU AND KASHMIR","JHARKHAND","KARNATAKA","KERALA","LAKSHADWEEP","MADHYA PRADESH","MAHARASHTRA","MANIPUR","MEGHALAYA","MIZORAM","NAGALAND","ODISHA","PUDUCHERRY","PUNJAB","RAJASTHAN","SIKKIM","TAMIL NADU","TRIPURA","UTTARAKHAND","UTTAR PRADESH","WEST BENGAL"];
+const SERVICE_OPTIONS = ["VEHICLE TAX COLLECTION (OTHER STATE)","VEHICLE TAX COLLECTION (NCR)"];
+const VEHICLE_PERMIT_TYPES = ["CONTRACT CARRIAGE/PASSENGER VEHICLE","PRIVATE SERVICE VEHICLE","GOODS VEHICLE","STAGE CARRIAGE","CONSTRUCTION EQUIPMENT VEHICLE","TEMPORARY REGISTERED VEHICLE"];
+const VEHICLE_CLASSES = ["MOTORCAB","MAXI CAB","OMNI BUS","BUS","SLEEPER BUS","LIGHT GOODS VEHICLE","MEDIUM GOODS VEHICLE","HEAVY GOODS VEHICLE"];
+const SERVICE_TYPES = ["NOT APPLICABLE","ORDINARY","AIR CONDITIONED","DELUX AIR CONDITIONED"];
+const TAX_MODES = ["DAYS","MONTHLY","QUARTERLY"];
+const BORDER_DISTRICTS = ["AMBALA","BHIWANI","CHARKHI DADRI","FARIDABAD","FATEHABAD","GURUGRAM","HISAR","JHAJJAR","JIND","KAITHAL","KARNAL","KURUKSHETRA","MAHENDRAGARH","NUH","PALWAL","PANCHKULA","PANIPAT","REWARI","ROHTAK","SIRSA","SONIPAT","YAMUNA NAGAR"];
+
+const STATE_STAMP_MAP = {
+  "HARYANA": "haryana-stamp.png",
+  "HIMACHAL PRADESH": "himachal-pradesh-stamp.png",
+  "MADHYA PRADESH": "madhya-pradesh-stamp.png",
+  "PUNJAB": "punjab-stamp.png",
+  "RAJASTHAN": "rajasthan-stamp.png",
+  "UTTAR PRADESH": "uttar-pradesh-stamp.png",
+  "UTTARAKHAND": "uttrakhand-stamp.png"
+};
+
+function getStampForState(stateName) {
+  return STATE_STAMP_MAP[stateName] || "stamp.png";
+}
+
+function SelectOverlay({ title, options, value, onSelect, onClose }) {
+  return (
+    <div className="overlay-backdrop" onClick={onClose}>
+      <div className="overlay-panel" onClick={e => e.stopPropagation()}>
+        <div className="overlay-header">
+          <span>{title}</span>
+          <button onClick={onClose}>✕</button>
+        </div>
+        <div className="overlay-list">
+          {options.map(opt => (
+            <div key={opt} className="overlay-item" onClick={() => onSelect(opt)}>
+              <span>{opt}</span>
+              <span className={"radio" + (value === opt ? " checked" : "")}></span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FakeSelect({ placeholder, value, onClick }) {
+  return (
+    <div className={"fake-select" + (!value ? " placeholder" : "")} onClick={onClick}>
+      <span>{value || placeholder}</span>
+    </div>
+  );
+}
+
+function Header() {
+  return (
+    <div className="top-banner">
+      <div className="logo-block">
+        <img src="https://upload.wikimedia.org/wikipedia/en/1/17/Digital_India_logo.png" onError={(e)=>{e.target.style.visibility='hidden';}} alt="Digital India" />
+      </div>
+      <div className="ministry-title">
+        MINISTRY OF ROAD TRANSPORT AND HIGHWAYS
+        <div className="sub">Government of India</div>
+      </div>
+      <div className="logo-block">
+        <img src="https://vahan.parivahan.gov.in/vahan4dashboard/img/e-vahan-logo.png" onError={(e)=>{e.target.style.visibility='hidden';}} alt="e-Vahan" />
+      </div>
+    </div>
+  );
+}
+
+function NavBar({ page, onHome, onChangeState, onLogout }) {
+  return (
+    <div className="nav-bar">
+      {page === "form" && <a onClick={onHome}>🏠 Home</a>}
+      {page === "form" && <a>📄 List</a>}
+      {page === "form" && <a onClick={onChangeState}>🔁 Change State</a>}
+      <a>📋 All Booking</a>
+      <a onClick={onLogout} style={{cursor:"pointer"}}>🔒 Logout</a>
+    </div>
+  );
+}
+
+function NoticeBar() {
+  return (
+    <div className="notice-bar">
+      ify the validity of the receipt by sending sms <b>VAHAN &lt;STATE CODE&gt;</b> to <b>7738299899</b> (e.g. VAHAN DL CP XXXXXXXX)
+    </div>
+  );
+}
+
+function HomePage({ onGo }) {
+  const [state, setState] = useState("");
+  const [service, setService] = useState("");
+  const [overlay, setOverlay] = useState(null);
+
+  const handleGo = () => {
+    if (!state || !service) {
+      alert("Please select both State and Service Name");
+      return;
+    }
+    onGo(state, service);
+  };
+
+  return (
+    <div className="form-section">
+      <div className="form-box">
+        <div className="form-box-header">Select State Name for Tax Payment</div>
+        <div className="form-box-body">
+          <div className="field-group">
+            <label>Select Visiting State Name</label>
+            <FakeSelect placeholder="Please select State" value={state} onClick={() => setOverlay("state")} />
+          </div>
+          <div className="field-group">
+            <label>Service Name</label>
+            <FakeSelect placeholder="Please select Service Name" value={service} onClick={() => setOverlay("service")} />
+          </div>
+          <button className="go-btn" onClick={handleGo}>Go</button>
+        </div>
+      </div>
+
+      {overlay === "state" && (
+        <SelectOverlay
+          title="Select Visiting State Name"
+          options={STATE_OPTIONS}
+          value={state}
+          onSelect={(v) => { setState(v); setOverlay(null); }}
+          onClose={() => setOverlay(null)}
+        />
+      )}
+      {overlay === "service" && (
+        <SelectOverlay
+          title="Select Service Name"
+          options={SERVICE_OPTIONS}
+          value={service}
+          onSelect={(v) => { setService(v); setOverlay(null); }}
+          onClose={() => setOverlay(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function Instructions() {
+  return (
+    <div className="instructions">
+      <h3>Follow these steps to initiate tax payment.</h3>
+      <ol>
+        <li>Select the state where you want to go from <b>'Select State'</b> combo box.</li>
+        <li>
+          Select service Name from <b>'Service Name'</b> combo box.
+          <ol>
+            <li>Select <b>'VEHICLE TAX COLLECTION (OTHER STATE)'</b> in case you do not have NCR permit.</li>
+            <li>Select <b>'VEHICLE TAX COLLECTION (NCR)'</b> in case you have NCR permit.</li>
+          </ol>
+        </li>
+        <li>Click <b>'Go'</b> button to open the vehicle details form.</li>
+        <li>Enter <b>'Vehicle No.'</b> and click <b>'Get Details'</b> button to fill the details.</li>
+        <li>Fill rest of the fields which are not filled automatically.</li>
+        <li>In case fields are not filled automatically then enter the details manually.</li>
+        <li>Click <b>'Calculate Tax'</b> button to calculate the tax according to state notification.</li>
+        <li>Click <b>'Pay Tax'</b> button to pay the calculated tax.</li>
+        <li>It opens the payment gateway of VAHAN.</li>
+      </ol>
+    </div>
+  );
+}
+
+function LoginPage({ onLogin }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (!username.trim() || !password.trim()) {
+      setError("Please enter both Username and Password.");
+      return;
+    }
+    // Hardcoded admin login
+    if (username.trim() === "taxindia" && password === "admin") {
+      onLogin("taxindia");
+      return;
+    }
+    setLoading(true);
+    try {
+      const snapshot = await firebase.firestore().collection("users")
+        .where("username", "==", username.trim())
+        .get();
+      if (snapshot.empty) {
+        setError("User not found. Please contact admin.");
+        setLoading(false);
+        return;
+      }
+      let found = false;
+      snapshot.forEach(doc => {
+        const userData = doc.data();
+        if (userData.password === password) {
+          found = true;
+          onLogin(userData.username);
+        }
+      });
+      if (!found) {
+        setError("Invalid Password. Please try again.");
+      }
+    } catch (err) {
+      setError("Login error: " + (err.message || "Please try again."));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="login-page">
+      <div className="hero-banner login-hero-banner"><img src="banner.png" alt="Banner" onError={(e)=>{e.target.style.display='none';}} /></div>
+      <div className="login-box">
+        <div className="login-header">
+          <h2>Border Tax Payment</h2>
+          <p>Ministry of Road Transport and Highways, Government of India</p>
+        </div>
+        <form className="login-body" onSubmit={handleSubmit}>
+          <div className={"login-error" + (error ? " show" : "")}>{error}</div>
+          <div className="login-field">
+            <label>Username</label>
+            <input
+              type="text"
+              placeholder="Enter Username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <div className="login-field">
+            <label>Password</label>
+            <input
+              type="password"
+              placeholder="Enter Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
+          </div>
+          <button type="submit" className="login-btn" disabled={loading}>{loading ? "Signing In..." : "Sign In"}</button>
+        </form>
+        <div className="login-footer">
+          &copy; 2026 Ministry of Road Transport and Highways. All rights reserved.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LabeledField({ label, required, children }) {
+  return (
+    <div className="field-group">
+      <label>{label} {required && <span className="req">*</span>}</label>
+      {children}
+    </div>
+  );
+}
+
+function TaxFormPage({ stateName, onPayTax, records, onViewRecord, searchQuery, onSearchChange }) {
+  const [vehicleNo, setVehicleNo] = useState("");
+  const [chassisNo, setChassisNo] = useState("");
+  const [ownerName, setOwnerName] = useState("");
+  const [mobileNo, setMobileNo] = useState("");
+  const [fromState, setFromState] = useState("");
+  const [permitType, setPermitType] = useState("");
+  const [vehicleClass, setVehicleClass] = useState("");
+  const [seatingCapacity, setSeatingCapacity] = useState("");
+  const [serviceType, setServiceType] = useState("");
+  const [distance, setDistance] = useState("");
+  const [taxMode, setTaxMode] = useState("");
+  const [borderDistrict, setBorderDistrict] = useState("");
+  const [taxFromDate, setTaxFromDate] = useState("");
+  const [taxUptoDate, setTaxUptoDate] = useState("");
+  const [totalAmount, setTotalAmount] = useState("");
+  const [overlay, setOverlay] = useState(null);
+  const [calOverlay, setCalOverlay] = useState(null);
+
+  const now = new Date();
+  const dateStr = pad(now.getDate()) + "-" + pad(now.getMonth()+1) + "-" + now.getFullYear();
+  const timeStr = pad(now.getHours()) + ":" + pad(now.getMinutes());
+
+  const overlayMap = {
+    fromState: { title: "Select From State", options: STATE_OPTIONS, value: fromState, set: setFromState },
+    permitType: { title: "Select Vehicle Permit Type", options: VEHICLE_PERMIT_TYPES, value: permitType, set: setPermitType },
+    vehicleClass: { title: "Select Vehicle Class", options: VEHICLE_CLASSES, value: vehicleClass, set: setVehicleClass },
+    serviceType: { title: "Select Service Type", options: SERVICE_TYPES, value: serviceType, set: setServiceType },
+    taxMode: { title: "Select Tax Mode", options: TAX_MODES, value: taxMode, set: setTaxMode },
+    borderDistrict: { title: "Select District/Barrier", options: BORDER_DISTRICTS, value: borderDistrict, set: setBorderDistrict },
+  };
+
+  const handlePayTax = () => {
+    if (!vehicleNo.trim()) {
+      alert("Please enter Vehicle Number before paying tax.");
+      return;
+    }
+    if (!ownerName.trim()) {
+      alert("Please enter Owner Name before paying tax.");
+      return;
+    }
+    const tax = parseInt(totalAmount) || 100;
+    const receiptNo = "HYD" + Date.now().toString().slice(-8);
+    const bankRef = "BANK" + Date.now().toString().slice(-10);
+    const data = {
+      registrationNo: vehicleNo || "HR-XX-XX-XXXX",
+      receiptNo: receiptNo,
+      paymentDate: dateStr + " " + timeStr,
+      ownerName: ownerName || "-",
+      chassisNo: chassisNo || "-",
+      taxMode: taxMode || "Days",
+      vehicleType: permitType || "Passenger Vehicle",
+      vehicleClass: vehicleClass || "Bus",
+      category: permitType || "-",
+      mobileNo: mobileNo || "-",
+      checkPost: borderDistrict || stateName,
+      seatingCapacity: seatingCapacity || "-",
+      bankRefNo: bankRef,
+      paymentMode: "Online",
+      fitnessValidity: "-",
+      insuranceValidity: "-",
+      puccValidity: "-",
+      serviceType: serviceType || "Ordinary",
+      permitType: permitType || "Stage Carriage",
+      paymentConfirmationDate: dateStr + " " + timeStr,
+      sleeperCap: "-",
+      taxFee: tax,
+      fine: 0,
+      total: tax,
+      qrData: vehicleNo + " | " + receiptNo + " | " + dateStr,
+      stateName: stateName
+    };
+    if (onPayTax) {
+      onPayTax(data);
+    }
+  };
+
+  return (
+    <div className="form-section">
+      <div className="title-bar" style={{marginBottom: 14}}>VEHICLE TAX PAYMENT FOR, {stateName.toUpperCase()}</div>
+
+      <div className="form-box">
+        <div className="form-box-header">Tax Payment Details</div>
+        <div className="form-box-body" style={{flexDirection: "column", alignItems: "stretch"}}>
+
+          <div style={{display:"flex", gap:16, flexWrap:"wrap", alignItems:"flex-end"}}>
+            <LabeledField label="Vehicle No." required>
+              <input value={vehicleNo} onChange={e => setVehicleNo(e.target.value)} />
+            </LabeledField>
+            <button className="action-btn" style={{marginBottom: 2}}>Get Details</button>
+          </div>
+
+          <div style={{display:"flex", gap:16, flexWrap:"wrap"}}>
+            <LabeledField label="Chassis No." required>
+              <input value={chassisNo} onChange={e => setChassisNo(e.target.value)} />
+            </LabeledField>
+            <LabeledField label="Owner Name" required>
+              <input value={ownerName} onChange={e => setOwnerName(e.target.value)} />
+            </LabeledField>
+          </div>
+
+          <div style={{display:"flex", gap:16, flexWrap:"wrap"}}>
+            <LabeledField label="Mobile No." required>
+              <input value={mobileNo} onChange={e => setMobileNo(e.target.value)} />
+            </LabeledField>
+            <LabeledField label="From State" required>
+              <FakeSelect placeholder="---Select State---" value={fromState} onClick={() => setOverlay("fromState")} />
+            </LabeledField>
+          </div>
+
+          <div style={{display:"flex", gap:16, flexWrap:"wrap"}}>
+            <LabeledField label="Vehicle Permit Type" required>
+              <FakeSelect placeholder="-- Select Vehicle Type --" value={permitType} onClick={() => setOverlay("permitType")} />
+            </LabeledField>
+            <LabeledField label="Vehicle Class" required>
+              <FakeSelect placeholder="-- Select Vehicle Class --" value={vehicleClass} onClick={() => setOverlay("vehicleClass")} />
+            </LabeledField>
+          </div>
+
+          <div style={{display:"flex", gap:16, flexWrap:"wrap"}}>
+            <LabeledField label="Seating Capacity (Excluding Driver)" required>
+              <input value={seatingCapacity} onChange={e => setSeatingCapacity(e.target.value)} />
+            </LabeledField>
+            <LabeledField label="Service Type" required>
+              <FakeSelect placeholder="-- Select Service Type --" value={serviceType} onClick={() => setOverlay("serviceType")} />
+            </LabeledField>
+          </div>
+
+          <div style={{display:"flex", gap:16, flexWrap:"wrap"}}>
+            <LabeledField label="Distance (In KM)" required>
+              <input value={distance} onChange={e => setDistance(e.target.value)} />
+            </LabeledField>
+            <LabeledField label="Tax Mode" required>
+              <FakeSelect placeholder="-- Select Tax Mode --" value={taxMode} onClick={() => setOverlay("taxMode")} />
+            </LabeledField>
+          </div>
+
+          <div style={{display:"flex", gap:16, flexWrap:"wrap"}}>
+            <LabeledField label="Border/Barrier District through Entering" required>
+              <FakeSelect placeholder="--Select District/Barrier--" value={borderDistrict} onClick={() => setOverlay("borderDistrict")} />
+            </LabeledField>
+            <LabeledField label="Tax From Date" required>
+              <FakeSelect placeholder="DD-MM-YYYY HH:MM" value={taxFromDate} onClick={() => setCalOverlay("from")} />
+            </LabeledField>
+            <LabeledField label="Tax Upto Date" required>
+              <FakeSelect placeholder="DD-MM-YYYY HH:MM" value={taxUptoDate} onClick={() => setCalOverlay("upto")} />
+            </LabeledField>
+          </div>
+
+          <table className="tax-table">
+            <thead>
+              <tr>
+                <th>Sl. No.</th>
+                <th>Particulars</th>
+                <th>Tax From</th>
+                <th>Tax Upto</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colSpan="5">No records found.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div className="total-row">
+            <label>Total Amount</label>
+            <input value={totalAmount} onChange={e => setTotalAmount(e.target.value)} />
+          </div>
+
+          <div className="btn-row">
+            <button className="action-btn" onClick={() => {
+              const tax = parseInt(totalAmount) || 100;
+              setTotalAmount(tax.toString());
+              alert("Tax calculated: \u20B9" + tax);
+            }}>Calculate Tax</button>
+            <button className="action-btn secondary" style={{border:"1px solid #2f6fb0"}} onClick={handlePayTax}>Pay Tax</button>
+            <button className="action-btn reset" onClick={() => {
+              setVehicleNo(""); setChassisNo(""); setOwnerName("");
+              setMobileNo(""); setFromState(""); setPermitType("");
+              setVehicleClass(""); setSeatingCapacity(""); setServiceType("");
+              setDistance(""); setTaxMode(""); setBorderDistrict("");
+              setTaxFromDate(""); setTaxUptoDate(""); setTotalAmount("");
+            }}>Reset</button>
+          </div>
+        </div>
+      </div>
+
+
+
+      {overlay && overlayMap[overlay] && (
+        <SelectOverlay
+          title={overlayMap[overlay].title}
+          options={overlayMap[overlay].options}
+          value={overlayMap[overlay].value}
+          onSelect={(v) => { overlayMap[overlay].set(v); setOverlay(null); }}
+          onClose={() => setOverlay(null)}
+        />
+      )}
+
+      {calOverlay === "from" && (
+        <CalendarPicker
+          title="Select Tax From Date"
+          value={taxFromDate}
+          onSelect={(v) => { setTaxFromDate(v); setCalOverlay(null); }}
+          onClose={() => setCalOverlay(null)}
+        />
+      )}
+      {calOverlay === "upto" && (
+        <CalendarPicker
+          title="Select Tax Upto Date"
+          value={taxUptoDate}
+          onSelect={(v) => { setTaxUptoDate(v); setCalOverlay(null); }}
+          onClose={() => setCalOverlay(null)}
+        />
+      )}
+
+      <RecordsList records={records} onView={onViewRecord} searchQuery={searchQuery} onSearchChange={onSearchChange} />
+    </div>
+  );
+}
+
+function numberToWords(num) {
+  if (num === 0) return "Zero";
+  const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+    "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+  const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+  if (num < 20) return ones[num];
+  if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? " " + ones[num % 10] : "");
+  if (num < 1000) return ones[Math.floor(num / 100)] + " Hundred" + (num % 100 ? " and " + numberToWords(num % 100) : "");
+  if (num < 100000) return numberToWords(Math.floor(num / 1000)) + " Thousand" + (num % 1000 ? " " + numberToWords(num % 1000) : "");
+  if (num < 10000000) return numberToWords(Math.floor(num / 100000)) + " Lakh" + (num % 100000 ? " " + numberToWords(num % 100000) : "");
+  return numberToWords(Math.floor(num / 10000000)) + " Crore" + (num % 10000000 ? " " + numberToWords(num % 10000000) : "");
+}
+
+function formatCurrency(num) {
+  return "\u20B9" + num + "/- " + numberToWords(num) + " Only";
+}
+
+function ReceiptTemplate({ data, forPrint }) {
+  React.useEffect(() => {
+    const qrEl = document.getElementById("qr-code-canvas");
+    if (qrEl) {
+      qrEl.innerHTML = "";
+      try {          new QRCode(qrEl, {
+          text: data.qrData || data.registrationNo || "N/A",
+          width: 110,
+          height: 110,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch(e) { console.error("QR generation failed:", e); }
+    }
+  }, [data]);
+
+  const watermarkPositions = [
+    { top: "8%", left: "15%" },
+    { top: "22%", left: "40%" },
+    { top: "36%", left: "10%" },
+    { top: "50%", left: "35%" },
+    { top: "64%", left: "5%" },
+    { top: "78%", left: "30%" },
+    { top: "90%", left: "15%" }
+  ];
+
+  const detailsLeft = [
+    { label: "Registration No", value: data.registrationNo },
+    { label: "Payment Date", value: data.paymentDate },
+    { label: "Chassis No", value: data.chassisNo },
+    { label: "Vehicle Type", value: data.vehicleType },
+    { label: "Category", value: data.category },
+    { label: "CheckPost Name", value: data.checkPost },
+    { label: "Sleeper Cap", value: data.sleeperCap || "-" },
+    { label: "Payment Mode", value: data.paymentMode },
+    { label: "Insurance Validity", value: data.insuranceValidity },
+    { label: "Service Type", value: data.serviceType },
+    { label: "Payment Confirmation Date", value: data.paymentConfirmationDate }
+  ];
+
+  const detailsRight = [
+    { label: "Receipt No", value: data.receiptNo },
+    { label: "Owner Name", value: data.ownerName },
+    { label: "Tax Mode", value: data.taxMode },
+    { label: "Vehicle Class", value: data.vehicleClass },
+    { label: "Mobile No", value: data.mobileNo },
+    { label: "Seating Capacity", value: data.seatingCapacity },
+    { label: "Bank Ref No", value: data.bankRefNo || "-" },
+    { label: "Fitness Validity", value: data.fitnessValidity || "-" },
+    { label: "PUCC Validity", value: data.puccValidity || "-" },
+    { label: "Permit Type", value: data.permitType }
+  ];
+
+  return (
+    <div className="receipt-wrapper" id="receipt-content">
+      <div className="receipt-watermark-bg">
+        {watermarkPositions.map((pos, i) => (
+          <div key={i} className="receipt-watermark-text" style={{ top: pos.top, left: pos.left }}>
+            {data.registrationNo}<br />{data.paymentDate}<br />{data.paymentConfirmationDate || "06:00 PM"}
+          </div>
+        ))}
+      </div>
+      <img src={getStampForState(data.stateName)} className="receipt-stamp-watermark" alt="" />
+      <div className="receipt-content">
+        <div className="receipt-header">
+          <div className="receipt-header-left">
+            <img src={getStampForState(data.stateName)} className="receipt-emblem" alt="Govt Emblem" />
+          </div>
+          <div className="receipt-header-center">
+            <h1>GOVERNMENT OF {data.stateName || "HARYANA"}</h1>
+            <h2>Department of Transport</h2>
+            <h3>Checkpost Tax Receipt</h3>
+          </div>
+          <div className="receipt-header-right">
+            <div id="qr-code-canvas"></div>
+          </div>
+        </div>
+
+        <div className="receipt-details">
+          <div className="receipt-details-col">
+            {detailsLeft.map((d, i) => (
+              <div key={i} className="receipt-detail-row">
+                <span className="receipt-detail-label">{d.label}</span>
+                <span className="receipt-detail-value">: {d.value || "-"}</span>
+              </div>
+            ))}
+          </div>
+          <div className="receipt-details-col">
+            {detailsRight.map((d, i) => (
+              <div key={i} className="receipt-detail-row">
+                <span className="receipt-detail-label">{d.label}</span>
+                <span className="receipt-detail-value">: {d.value || "-"}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <table className="receipt-table">
+          <thead>
+            <tr>
+              <th>Tax/Fee Particular</th>
+              <th>Tax/Fees</th>
+              <th>Fine</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Border Tax - {data.vehicleType || "Vehicle"}</td>
+              <td>{data.taxFee || 0}</td>
+              <td>{data.fine || 0}</td>
+              <td>{data.total || 0}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div className="receipt-grand-total">
+          <span>Grand Total</span>
+          <span className="amount">{formatCurrency(data.total || 0)}</span>
+        </div>
+
+        <div className="receipt-footer">
+          <b>Note:</b><br/>
+          <b>Terms and Conditions</b>
+          <ol>
+            <li>This is a computer generated printout and no signature is required.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PreviewPage({ receiptData, onBack }) {
+  const handlePrint = () => {
+    const printContent = document.getElementById("preview-receipt-content");
+    if (!printContent) return;
+    const originalTitle = document.title;
+    document.title = "Tax Receipt";
+    const style = document.createElement("style");
+    style.id = "print-style-temp";
+    style.textContent = "@media print { body * { visibility: hidden; } #preview-receipt-content, #preview-receipt-content * { visibility: visible; } #preview-receipt-content { position: absolute; left: 0; top: 0; width: 100%; } .preview-pdf-wrapper, .preview-pdf-wrapper .receipt-wrapper { overflow: visible !important; } .receipt-wrapper { width: 100% !important; padding: 20px !important; min-height: auto !important; } .receipt-watermark-text { color: rgba(0,0,0,0.04) !important; } .receipt-table th { background: #444 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; } .receipt-grand-total { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }";
+    document.head.appendChild(style);
+    window.print();
+    document.head.removeChild(style);
+    document.title = originalTitle;
+  };
+
+  const handleDownload = async () => {
+    if (typeof html2canvas === "undefined" || !window.jspdf) {
+      alert("Required PDF libraries failed to load. Please refresh and try again.");
+      return;
+    }
+    const element = document.getElementById("preview-receipt-content");
+    if (!element) { alert("Receipt not ready. Please try again."); return; }
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        width: 794,
+        height: 1123,
+        windowWidth: 794,
+        windowHeight: 1123
+      });
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgData = canvas.toDataURL("image/png");
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("tax_receipt.pdf");
+      alert("PDF downloaded successfully as tax_receipt.pdf!");
+    } catch (err) {
+      console.error("PDF generation error:", err);
+      alert("Error generating PDF. Please try again.");
+    }
+  };
+
+  return (
+    <div className="preview-page">
+      <div className="preview-banner"><img src="banner.png" alt="Banner" onError={(e)=>{e.target.style.display='none';}} /></div>
+      <div className="preview-content">
+        <div className="preview-title">Tax Receipt Preview</div>
+        <div className="preview-pdf-wrapper">
+          <div id="preview-receipt-content">
+            <ReceiptTemplate data={receiptData} />
+          </div>
+        </div>
+        <div className="preview-btn-row">
+          <button className="preview-download-btn" onClick={handleDownload}>⬇ Download PDF</button>
+          <button className="preview-print-btn" onClick={handlePrint}>🖨 Print</button>
+        </div>
+        <button className="preview-back-btn" onClick={onBack}>← Back to Form</button>
+      </div>
+      <div className="login-footer">&copy; 2026 Ministry of Road Transport and Highways. All rights reserved.</div>
+    </div>
+  );
+}
+
+function AdminPanel({ onClose }) {
+  const [newUsername, setNewUsername] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [msg, setMsg] = useState({ text: "", type: "" });
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [editUsername, setEditUsername] = useState("");
+  const [editPassword, setEditPassword] = useState("");
+
+  const loadUsers = async () => {
+    try {
+      const snapshot = await firebase.firestore().collection("users").orderBy("createdAt", "desc").get();
+      const list = [];
+      snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+      setUsers(list);
+    } catch(e) { console.error("Load users error:", e); }
+  };
+
+  React.useEffect(() => { loadUsers(); }, []);
+
+  const handleAddUser = async () => {
+    if (!newUsername.trim() || !newPassword.trim()) {
+      setMsg({ text: "Please enter both Username and Password.", type: "error" });
+      return;
+    }
+    if (newPassword.length < 6) {
+      setMsg({ text: "Password must be at least 6 characters.", type: "error" });
+      return;
+    }
+    setLoading(true);
+    setMsg({ text: "", type: "" });
+    try {
+      const checkSnapshot = await firebase.firestore().collection("users")
+        .where("username", "==", newUsername.trim()).get();
+      if (!checkSnapshot.empty) {
+        setMsg({ text: "Username already exists!", type: "error" });
+        setLoading(false);
+        return;
+      }
+
+      await firebase.firestore().collection("users").add({
+        username: newUsername.trim(),
+        password: newPassword,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      setMsg({ text: "User \"" + newUsername.trim() + "\" added successfully!", type: "success" });
+      setNewUsername("");
+      setNewPassword("");
+      loadUsers();
+    } catch (err) {
+      setMsg({ text: err.message || "Failed to add user.", type: "error" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId, username) => {
+    if (!confirm("Delete user \"" + username + "\"?")) return;
+    try {
+      await firebase.firestore().collection("users").doc(userId).delete();
+      setMsg({ text: "User \"" + username + "\" deleted!", type: "success" });
+      loadUsers();
+    } catch (err) {
+      setMsg({ text: err.message || "Failed to delete.", type: "error" });
+    }
+  };
+
+  const startEdit = (user) => {
+    setEditingId(user.id);
+    setEditUsername(user.username || "");
+    setEditPassword(user.password || "");
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditUsername("");
+    setEditPassword("");
+  };
+
+  const handleSaveEdit = async (userId, oldUsername) => {
+    if (!editUsername.trim() || !editPassword.trim()) {
+      setMsg({ text: "Username and Password cannot be empty.", type: "error" });
+      return;
+    }
+    if (editPassword.length < 6) {
+      setMsg({ text: "Password must be at least 6 characters.", type: "error" });
+      return;
+    }
+    try {
+      // Check duplicate only if username changed
+      if (editUsername.trim() !== oldUsername) {
+        const checkSnapshot = await firebase.firestore().collection("users")
+          .where("username", "==", editUsername.trim()).get();
+        if (!checkSnapshot.empty) {
+          setMsg({ text: "Username already exists!", type: "error" });
+          return;
+        }
+      }
+      await firebase.firestore().collection("users").doc(userId).update({
+        username: editUsername.trim(),
+        password: editPassword
+      });
+      setMsg({ text: "User updated successfully!", type: "success" });
+      setEditingId(null);
+      loadUsers();
+    } catch (err) {
+      setMsg({ text: err.message || "Failed to update.", type: "error" });
+    }
+  };
+
+  return (
+    <div className="overlay-backdrop" onClick={onClose}>
+      <div className="admin-panel" onClick={e => e.stopPropagation()}>
+        <div className="admin-header">
+          <span>Admin Panel - Add User</span>
+          <button onClick={onClose}>✕</button>
+        </div>
+        <div className="admin-body">
+          <div className="admin-field">
+            <label>Username</label>
+            <input type="text" placeholder="Enter username" value={newUsername} onChange={e => setNewUsername(e.target.value)} />
+          </div>
+          <div className="admin-field">
+            <label>Password</label>
+            <input type="password" placeholder="Enter password (min 6 chars)" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+          </div>
+          <button className="admin-add-btn" onClick={handleAddUser} disabled={loading}>{loading ? "Adding..." : "Add User"}</button>
+          <div className={"admin-msg show " + msg.type} style={{display: msg.text ? "block" : "none"}}>{msg.text}</div>
+          {users.length > 0 && (
+            <div className="admin-user-list">
+              <h4>Registered Users ({users.length})</h4>
+              {users.map(u => (
+                <div key={u.id}>
+                  {editingId === u.id ? (
+                    <div style={{padding:"8px 0",borderBottom:"1px solid #f0f0f0"}}>
+                      <div className="admin-edit-row">
+                        <input type="text" value={editUsername} onChange={e => setEditUsername(e.target.value)} placeholder="Username" />
+                        <input type="password" value={editPassword} onChange={e => setEditPassword(e.target.value)} placeholder="Password" />
+                      </div>
+                      <div className="admin-edit-row" style={{marginTop:6}}>
+                        <button className="save-btn" onClick={() => handleSaveEdit(u.id, u.username)}>Save</button>
+                        <button className="cancel-btn" onClick={cancelEdit}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="admin-user-item">
+                      <span className="uname">{u.username}</span>
+                      <div className="btn-group">
+                        <button className="edit-btn" onClick={() => startEdit(u)}>Edit</button>
+                        <button className="del-btn" onClick={() => handleDeleteUser(u.id, u.username)}>Delete</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecordsList({ records, onView, searchQuery, onSearchChange }) {
+  return (
+    <div className="records-section form-box">
+      <div className="form-box-header">Payment Records</div>
+      <div className="form-box-body">
+        <div className="records-search">
+          <input type="text" placeholder="Search by vehicle no, owner name, mobile no, receipt no..." value={searchQuery} onChange={e => onSearchChange(e.target.value)} />
+        </div>
+        {records.length === 0 ? (
+          <div style={{textAlign:"center",padding:20,color:"#888"}}>No records found.</div>
+        ) : (
+          <div className="records-table-wrap">
+            <table className="records-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Receipt No</th>
+                  <th>Vehicle No</th>
+                  <th>Owner Name</th>
+                  <th>Mobile No</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {records.map((r, i) => (
+                  <tr key={r.id || i}>
+                    <td>{i + 1}</td>
+                    <td>{r.receiptNo || "-"}</td>
+                    <td>{r.registrationNo || "-"}</td>
+                    <td>{r.ownerName || "-"}</td>
+                    <td>{r.mobileNo || "-"}</td>
+                    <td>{"\u20B9"}{r.total || 0}</td>
+                    <td>{r.paymentDate || "-"}</td>
+                    <td><button className="view-btn" onClick={() => onView(r)}>View</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState("");
+  const [page, setPage] = useState("home");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedService, setSelectedService] = useState("");
+  const [previewData, setPreviewData] = useState(null);
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [records, setRecords] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewRecord, setViewRecord] = useState(null);
+  const historyRef = useRef(["home"]);
+
+  // Browser back button navigation
+  const navigate = (newPage) => {
+    historyRef.current.push(newPage);
+    setPage(newPage);
+    window.history.pushState({ page: newPage }, "");
+  };
+
+  const goBack = () => {
+    if (historyRef.current.length <= 1) return;
+    historyRef.current.pop();
+    const prevPage = historyRef.current[historyRef.current.length - 1];
+    setPage(prevPage);
+    if (prevPage !== "preview") {
+      setPreviewData(null);
+    }
+  };
+
+  React.useEffect(() => {
+    window.history.pushState({ page: "home" }, "");
+    const handlePopState = () => goBack();
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  // Load records from Firestore for current user
+  React.useEffect(() => {
+    if (!loggedIn || !currentUser) {
+      setRecords([]);
+      return;
+    }
+    const unsubscribe = firebase.firestore().collection("records")
+      .where("createdBy", "==", currentUser)
+      .orderBy("createdAt", "desc")
+      .onSnapshot((snapshot) => {
+        const list = [];
+        snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+        setRecords(list);
+      }, (err) => {
+        console.error("Firestore load error:", err);
+      });
+    return () => unsubscribe();
+  }, [loggedIn, currentUser]);
+
+  const handleLogin = (username) => {
+    setCurrentUser(username);
+    setLoggedIn(true);
+    if (username === "taxindia") {
+      setShowAdmin(true);
+    }
+  };
+
+  if (!loggedIn) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
+  const handleGo = (state, service) => {
+    setSelectedState(state);
+    setSelectedService(service);
+    navigate("form");
+  };
+
+  const handlePayTax = async (data) => {
+    try {
+      data.createdBy = currentUser;
+      data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      await firebase.firestore().collection("records").add(data);
+    } catch (err) {
+      console.error("Save record error:", err);
+    }
+    setPreviewData(data);
+    navigate("preview");
+  };
+
+  const handleViewRecord = (record) => {
+    setViewRecord(record);
+    setPreviewData(record);
+    navigate("preview");
+  };
+
+  const handleLogout = () => {
+    setLoggedIn(false);
+    setCurrentUser("");
+    setRecords([]);
+    setPage("home");
+    historyRef.current = ["home"];
+  };
+
+  // Filter records by search query
+  const filteredRecords = records.filter(r => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (r.registrationNo && r.registrationNo.toLowerCase().includes(q))
+      || (r.ownerName && r.ownerName.toLowerCase().includes(q))
+      || (r.mobileNo && r.mobileNo.toLowerCase().includes(q))
+      || (r.receiptNo && r.receiptNo.toLowerCase().includes(q))
+      || (r.vehicleNo && r.vehicleNo.toLowerCase().includes(q))
+      || (r.chassisNo && r.chassisNo.toLowerCase().includes(q));
+  });
+
+  if (page === "preview" && previewData) {
+    return <PreviewPage receiptData={previewData} onBack={() => { goBack(); }} />;
+  }
+
+  return (
+    <div className="page-wrap">
+      <div className="hero-banner">
+        <img src="banner.png" alt="Banner" onError={(e)=>{e.target.style.display='none';}} />
+      </div>
+      <Header />
+      <NavBar page={page} onHome={() => navigate("home")} onChangeState={() => navigate("home")} onLogout={handleLogout} />
+      <NoticeBar />
+      {page === "home" && (
+        <React.Fragment>
+          <div className="title-bar">BORDER TAX PAYMENT</div>
+          <div className="payment-bar">Total Payment :&nbsp; 28863</div>
+          <HomePage onGo={handleGo} />
+          <Instructions />
+        </React.Fragment>
+      )}
+      {page === "form" && (
+        <TaxFormPage
+          stateName={selectedState}
+          onPayTax={handlePayTax}
+          records={filteredRecords}
+          onViewRecord={handleViewRecord}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
+      )}
+
+      {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
